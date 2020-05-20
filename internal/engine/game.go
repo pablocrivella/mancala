@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 )
 
@@ -16,6 +14,9 @@ const (
 	Player1Turn Turn = iota
 	// Player2Turn represents the turn of the Player #2
 	Player2Turn
+)
+
+const (
 	// Player1Wins represents a game result where Player1 wins the game
 	Player1Wins Result = iota
 	// Player2Wins represents a game result where Player2 wins the game
@@ -24,8 +25,9 @@ const (
 	Tie
 	// Undefined represents a yet undefined result for a game
 	Undefined
-	pitsPerSide = 6
 )
+
+const pitsPerSide = 6
 
 type (
 	// Game represents a Mancala game.
@@ -42,31 +44,22 @@ type (
 
 	// Result represents the result of the game after it is done, can be Player1Wins, Player2Wins or Tie
 	Result int
-
-	// ErrInvalidPlay represents an invalid play error.
-	ErrInvalidPlay struct {
-		Msg string
-	}
 )
-
-func (e *ErrInvalidPlay) Error() string {
-	return fmt.Sprintf("invalid play: %v", e.Msg)
-}
 
 // PlayTurn from the given pitIndex for the current playingSide.
 func (game *Game) PlayTurn(pitIndex int) error {
 	if pitIndex < 0 || pitIndex > pitsPerSide-1 {
-		return &ErrInvalidPlay{Msg: "pit index is invalid"}
+		return &InvalidPlayError{Msg: "pit index is invalid"}
 	}
 
 	if game.IsDone() {
-		return &ErrInvalidPlay{Msg: "game is already done"}
+		return &InvalidPlayError{Msg: "game is already done"}
 	}
 
 	stones := game.playingSide().pickStones(pitIndex)
 
 	if stones == 0 {
-		return &ErrInvalidPlay{Msg: "selected pit is empty"}
+		return &InvalidPlayError{Msg: "selected pit is empty"}
 	}
 
 	game.placeStones(pitIndex+1, stones)

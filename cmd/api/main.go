@@ -29,15 +29,15 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 
-	api := restapi.App{
-		GamesResource: &resources.GamesResource{
+	r := restapi.Resources{
+		Games: resources.GamesResource{
 			GamesService: games.NewService(g),
 		},
 	}
 	v1 := e.Group("/v1")
-	v1.GET("/games/:id", api.GamesResource.Show)
-	v1.POST("/games", api.GamesResource.Create)
-	v1.PATCH("/games/:id", api.GamesResource.Update)
+	v1.GET("/games/:id", r.Games.Show)
+	v1.POST("/games", r.Games.Create)
+	v1.PATCH("/games/:id", r.Games.Update)
 
 	port := os.Getenv("PORT")
 
