@@ -1,8 +1,12 @@
 package engine
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 )
+
+var ErrGameNotFound = errors.New("game not found")
 
 const (
 	// Player1Turn represents the turn of the Player #1

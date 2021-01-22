@@ -10,3 +10,7 @@
 .vscode/
 /node_modules/
 NOTES.md
+internal/postgres/sqlc/*
+api/openapi-v2/models/*
+api/openapi-v2/restapi/*
+!api/openapi-v2/restapi/configure_mancala.go

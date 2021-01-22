@@ -1,49 +1,50 @@
 package games
 
 import (
+	"context"
+
 	"github.com/pablocrivella/mancala/internal/engine"
 )
 
 // Service is a games context domain service
 type Service struct {
-	gameRepo GameRepo
+	GameStore interface {
+		Find(context.Context, string) (*engine.Game, error)
+		Save(context.Context, engine.Game) (*engine.Game, error)
+	}
 }
 
-// NewService returns a games.Service
-func NewService(g GameRepo) Service {
-	return Service{gameRepo: g}
-}
-
-func (s Service) CreateGame(player1, player2 string) (engine.Game, error) {
+func (s Service) CreateGame(player1, player2 string) (*engine.Game, error) {
 	g := engine.NewGame(player1, player2)
-	if err := s.gameRepo.Save(g); err != nil {
-		return engine.Game{}, err
+	sg, err := s.GameStore.Save(context.Background(), g)
+	if err != nil {
+		return nil, err
+	}
+	return sg, nil
+}
+
+func (s Service) FindGame(id string) (*engine.Game, error) {
+	g, err := s.GameStore.Find(context.Background(), id)
+	if err != nil {
+		return nil, err
 	}
 	return g, nil
 }
 
-func (s Service) FindGame(id string) (engine.Game, error) {
-	g, err := s.gameRepo.Find(id)
+func (s Service) ExecutePlay(gameID string, pitIndex int64) (*engine.Game, error) {
+	g, err := s.FindGame(gameID)
 	if err != nil {
-		return engine.Game{}, err
-	}
-	return g, nil
-}
-
-func (s Service) ExecutePlay(gameID string, pitIndex int64) (engine.Game, error) {
-	g, err := s.gameRepo.Find(gameID)
-	if err != nil {
-		return engine.Game{}, err
+		return nil, err
 	}
 
 	err = g.PlayTurn(pitIndex)
 	if err != nil {
-		return engine.Game{}, err
+		return nil, err
 	}
 
-	err = s.gameRepo.Save(g)
+	sg, err := s.GameStore.Save(context.Background(), *g)
 	if err != nil {
-		return engine.Game{}, err
+		return nil, err
 	}
-	return g, nil
+	return sg, nil
 }

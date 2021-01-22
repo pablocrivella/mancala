@@ -1,48 +1,71 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"flag"
+
+	"github.com/go-openapi/loads"
+
+	"github.com/pablocrivella/mancala/api/openapi-v2/restapi"
+	"github.com/pablocrivella/mancala/api/openapi-v2/restapi/operations"
+	"github.com/pablocrivella/mancala/cmd/api/handlers"
 	"github.com/pablocrivella/mancala/internal/games"
-	"github.com/pablocrivella/mancala/internal/infrastructure/persistence"
-	"github.com/pablocrivella/mancala/internal/restapi"
-	"github.com/pablocrivella/mancala/internal/restapi/resources"
+	"github.com/pablocrivella/mancala/internal/postgres"
 )
 
+const exitFail = 1
+
 func main() {
-	redisURL, ok := os.LookupEnv("REDIS_URL")
-	if !ok {
-		panic("missing env variable: REDIS_URL")
-	}
-	redisClient, err := persistence.NewRedisClient(redisURL)
+	err := run()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(exitFail)
 	}
-	gameRepo := persistence.NewGameRepo(redisClient)
+}
 
-	e := echo.New()
-	e.File("/", "website/public/index.html")
-
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.RequestID())
-
-	r := restapi.Resources{
-		Games: resources.GamesResource{
-			GamesService: games.NewService(gameRepo),
-		},
+func run() error {
+	db, err := postgres.OpenDB(os.Getenv("DATABASE_URL"))
+	if err != nil {
+		return err
 	}
-	v1 := e.Group("/v1")
-	v1.GET("/games/:id", r.Games.Show)
-	v1.POST("/games", r.Games.Create)
-	v1.PATCH("/games/:id", r.Games.Update)
+	defer db.Close()
 
-	port := os.Getenv("PORT")
-	if len(port) == 0 {
-		port = "1323"
+	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
+	if err != nil {
+		return err
 	}
+	var server *restapi.Server // make sure init is called
 
-	e.Logger.Fatal(e.Start(":" + port))
+	flag.Usage = func() {
+		fmt.Fprint(os.Stderr, "Usage:\n")
+		fmt.Fprint(os.Stderr, "  mancala-server [OPTIONS]\n\n")
+
+		title := "Mancala API"
+		fmt.Fprint(os.Stderr, title+"\n\n")
+		desc := swaggerSpec.Spec().Info.Description
+		if desc != "" {
+			fmt.Fprintf(os.Stderr, desc+"\n\n")
+		}
+		flag.CommandLine.SetOutput(os.Stderr)
+		flag.PrintDefaults()
+	}
+	// parse the CLI flags
+	flag.Parse()
+	api := operations.NewMancalaAPI(swaggerSpec)
+
+	gameStore := postgres.NewGameStore(db)
+	gameService := games.Service{GameStore: gameStore}
+	g := handlers.Games{GameService: gameService}
+	g.Register(api)
+	// get server with flag values filled out
+	server = restapi.NewServer(api)
+	defer server.Shutdown()
+
+	server.ConfigureAPI()
+	if err := server.Serve(); err != nil {
+		return err
+	}
+	return nil
 }
