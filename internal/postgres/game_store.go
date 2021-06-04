@@ -25,6 +25,7 @@ func NewGameStore(db *sql.DB) GameStore {
 func (s GameStore) Save(ctx context.Context, g engine.Game) (*engine.Game, error) {
 	queries := sqlc.New(s.db)
 	params := sqlc.UpsertGameParams{
+		ID:     g.ID,
 		Turn:   int64(g.Turn),
 		Result: int64(g.Result),
 	}
@@ -94,7 +95,7 @@ func dbRecordToGame(r sqlc.Game) (engine.Game, error) {
 		return game, err
 	}
 	game.BoardSide1 = side1
-	side2, err := jsonRawMessageToBoardSide(r.BoardSide1)
+	side2, err := jsonRawMessageToBoardSide(r.BoardSide2)
 	if err != nil {
 		return game, err
 	}

@@ -1,0 +1,242 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "proto/mancala/v1/game_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "GameService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/games": {
+      "post": {
+        "operationId": "GameService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GameService"
+        ]
+      }
+    },
+    "/v1/games/{id}": {
+      "get": {
+        "operationId": "GameService_Find",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1FindResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "GameService"
+        ]
+      },
+      "patch": {
+        "operationId": "GameService_ExecutePlay",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ExecutePlayResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ExecutePlayRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GameService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1BoardSide": {
+      "type": "object",
+      "properties": {
+        "pits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "store": {
+          "type": "string",
+          "format": "int64"
+        },
+        "player": {
+          "$ref": "#/definitions/v1Player"
+        }
+      }
+    },
+    "v1CreateRequest": {
+      "type": "object",
+      "properties": {
+        "player1": {
+          "type": "string"
+        },
+        "player2": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateResponse": {
+      "type": "object",
+      "properties": {
+        "game": {
+          "$ref": "#/definitions/v1Game"
+        }
+      }
+    },
+    "v1ExecutePlayRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pitIndex": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1ExecutePlayResponse": {
+      "type": "object",
+      "properties": {
+        "game": {
+          "$ref": "#/definitions/v1Game"
+        }
+      }
+    },
+    "v1FindResponse": {
+      "type": "object",
+      "properties": {
+        "game": {
+          "$ref": "#/definitions/v1Game"
+        }
+      }
+    },
+    "v1Game": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "side1": {
+          "$ref": "#/definitions/v1BoardSide"
+        },
+        "side2": {
+          "$ref": "#/definitions/v1BoardSide"
+        }
+      }
+    },
+    "v1Player": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "score": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

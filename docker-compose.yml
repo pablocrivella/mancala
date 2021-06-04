@@ -1,19 +1,5 @@
 version: "3"
 services:
-  server:
-    container_name: mancala-server
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - db
-    environment:
-      DATABASE_URL: postgres://mancala-app:p4ssw0rd@db:5432/mancala-db?sslmode=disable
-    volumes:
-      - .:/app
-    ports:
-      - 1323:1323
-  
   db:
     image: postgres:13-alpine
     container_name: mancala-db

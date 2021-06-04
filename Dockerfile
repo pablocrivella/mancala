@@ -5,4 +5,4 @@ WORKDIR /app
 COPY ./ ./
 
 EXPOSE 1323
-ENTRYPOINT ["go", "run", "./cmd/api", "--schema", "http"]
+ENTRYPOINT ["go", "run", "./cmd/api", "--schema", "http", "--port", "8080"]

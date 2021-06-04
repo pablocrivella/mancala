@@ -1,12 +1,23 @@
 package engine
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
-// InvalidPlayError represents an invalid play error.
-type InvalidPlayError struct {
-	Msg string
-}
+var (
+	// ErrGameNotFound happens when the game cannot be found
+	ErrGameNotFound = errors.New("game not found")
 
-func (e InvalidPlayError) Error() string {
-	return fmt.Sprintf("invalid play: %v", e.Msg)
-}
+	// ErrSelectedEmptyPit happens when the selected pit is empty
+	ErrSelectedEmptyPit = fmt.Errorf("%w: selected pit is empty", ErrInvalidPlay)
+
+	// ErrGameIsDone happens when a play is placed after the game is finished
+	ErrGameIsDone = fmt.Errorf("%w: game is already done", ErrInvalidPlay)
+
+	// ErrSelectedInvalidPit happens when the selected pit is out of bounds (0-5)
+	ErrSelectedInvalidPit = fmt.Errorf("%w: selected pit is invalid", ErrInvalidPlay)
+
+	// ErrInvalidPlay happends when a play cannot be performed due to a specific error
+	ErrInvalidPlay = errors.New("invalid play")
+)

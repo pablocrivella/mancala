@@ -1,0 +1,82 @@
+syntax = "proto3";
+package proto.mancala.v1;
+option go_package = "github.com/pcriv/mancala/pkg/proto/mancala/v1";
+
+import "google/api/annotations.proto";
+
+message FindRequest {
+    string id = 1;
+}
+
+message FindResponse {
+    Game game = 1;
+}
+
+message CreateRequest {
+    string player1 = 1;
+    string player2 = 2;
+}
+
+message CreateResponse {
+    Game game = 1;
+}
+
+message ExecutePlayRequest {
+    string id = 1;
+    int64 pit_index = 2;
+}
+
+message ExecutePlayResponse {
+    Game game = 1;
+}
+
+message Game {
+    string id = 1;
+    BoardSide side1 = 2;
+    BoardSide side2 = 3;
+}
+
+message BoardSide {
+    repeated int64 pits = 1;
+    int64 store = 2;
+    Player player = 3;
+}
+
+message Player {
+    string name = 1;
+    int64 score = 2;
+}
+
+enum Turn {
+    TURN_UNSPECIFIED = 0;
+    TURN_PLAYER1 = 1;
+    TURN_PLAYER2 = 2;
+}
+
+enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_PLAYER1_WINS = 1;
+    RESULT_PLAYER2_WINS= 2;
+    RESULT_TIE = 3;
+}
+
+service GameService {
+    rpc Find(FindRequest) returns (FindResponse) {
+        option (google.api.http) = {
+            get: "/v1/games/{id}"
+        };
+        
+    }
+    rpc Create(CreateRequest) returns (CreateResponse) {
+        option (google.api.http) = {
+            post: "/v1/games"
+            body: "*"
+        };
+    }
+    rpc ExecutePlay(ExecutePlayRequest) returns (ExecutePlayResponse) {
+        option (google.api.http) = {
+            patch: "/v1/games/{id}"
+            body: "*"
+        };
+    }
+}

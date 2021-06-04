@@ -1,18 +1,14 @@
 package engine
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 )
 
-var ErrGameNotFound = errors.New("game not found")
-
 const (
 	// Player1Turn represents the turn of the Player #1
-	Player1Turn Turn = iota
+	Player1Turn Turn = 1
 	// Player2Turn represents the turn of the Player #2
-	Player2Turn
+	Player2Turn Turn = 2
 )
 
 const (
@@ -31,11 +27,11 @@ const pitsPerSide int64 = 6
 type (
 	// Game represents a Mancala game.
 	Game struct {
-		ID         uuid.UUID `json:"id"`
-		Turn       Turn      `json:"turn"`
-		BoardSide1 BoardSide `json:"board_side1"`
-		BoardSide2 BoardSide `json:"board_side2"`
-		Result     Result    `json:"result"`
+		ID         uuid.UUID
+		Turn       Turn
+		BoardSide1 BoardSide
+		BoardSide2 BoardSide
+		Result     Result
 	}
 
 	// Turn represents a turn on the mancala game, can be Player1Turn or Player2Turn
@@ -48,17 +44,17 @@ type (
 // PlayTurn from the given pitIndex for the current playingSide.
 func (game *Game) PlayTurn(pitIndex int64) error {
 	if pitIndex < 0 || pitIndex > pitsPerSide-1 {
-		return &InvalidPlayError{Msg: "pit index is invalid"}
+		return ErrSelectedInvalidPit
 	}
 
 	if game.IsDone() {
-		return &InvalidPlayError{Msg: "game is already done"}
+		return ErrGameIsDone
 	}
 
 	stones := game.playingSide().pickStones(pitIndex)
 
 	if stones == 0 {
-		return &InvalidPlayError{Msg: "selected pit is empty"}
+		return ErrSelectedEmptyPit
 	}
 
 	game.placeStones(pitIndex+1, stones)
